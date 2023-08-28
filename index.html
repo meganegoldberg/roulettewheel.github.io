@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Roulette Wheel</title>
+
+<link rel="stylesheet" href="http://dougtesting.net/elements/css/screen.css" />
+        <link type="text/css" rel="stylesheet" href="http://dougtesting.net/elements/javascript/syntax/styles/shCoreDefault.css"/>
+<script type="text/javascript" src="Winwheel.js"></script>
+<script type="text/javascript" src="TweenMax.min.js"></script>
+</head>
+<body>
+<div class="container">
+<div class="content">
+Select the amount of "spin power" you wish to apply to the wheel (higher power means a faster spin) then click the Spin button to
+spin the wheel.  Or, if you want the computer to randomize your spin power, simply click on the spin button.
+    <div class="example_wheel">
+        <table cellpadding="0" cellspacing="0" border="0">
+            <tr>
+                <td>
+                    <div class="power_controls">
+                        <br />
+                        <br />
+                        <table class="power" cellpadding="10" cellspacing="0">
+                            <tr>
+                                <th align="center">Spin Power</th>
+                            </tr>
+                            <tr>
+                                <td width="78" align="center" id="pw3" onClick="powerSelected(3);">High</td>
+                            </tr>
+                            <tr>
+                                <td align="center" id="pw2" onClick="powerSelected(2);">Med</td>
+                            </tr>
+                            <tr>
+                                <td align="center" id="pw1" onClick="powerSelected(1);">Low</td>
+                            </tr>
+                        </table>
+                        <br />
+                        <img id="spin_button" src="http://dougtesting.net//elements/images/examples/spin_off.png" alt="Spin" onClick="startSpin();" />
+                        <br /><br />
+                       
+                    </div>
+                </td>
+                <td width="438" height="582" class="the_wheel" align="center" valign="center">
+                    <canvas id="canvas" width="434" height="434">
+                        <p style="{color: white}" align="center">Sorry, your browser doesn't support canvas. Please try another.</p>
+                    </canvas>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <script>
+
+        // Create new wheel object specifying the parameters at creation time.
+        let theWheel = new Winwheel({
+            'numSegments'  : 20,
+            'outerRadius'  : 212,
+            'centerX'      : 217,
+            'centerY'      : 219,
+            'textFontSize' : 28,
+            'textOrientation' : 'vertical',
+            'textAlignment' : 'outer',
+            'segments'     :
+            [
+               {'fillStyle' : '#eae56f', 'text' : ' 5'},
+               {'fillStyle' : '#89f26e', 'text' : '40'},
+               {'fillStyle' : '#7de6ef', 'text' : '75'},
+               {'fillStyle' : '#e7706f', 'text' : '10'},
+               {'fillStyle' : '#eae56f', 'text' : '45'},
+               {'fillStyle' : '#89f26e', 'text' : '80'},
+               {'fillStyle' : '#7de6ef', 'text' : '15'},
+               {'fillStyle' : '#e7706f', 'text' : '50'},
+               {'fillStyle' : '#eae56f', 'text' : '85'},
+               {'fillStyle' : '#89f26e', 'text' : '20'},
+               {'fillStyle' : '#7de6ef', 'text' : '55'},
+               {'fillStyle' : '#e7706f', 'text' : '90'},
+               {'fillStyle' : '#eae56f', 'text' : '25'},
+               {'fillStyle' : '#89f26e', 'text' : '60'},
+               {'fillStyle' : '#7de6ef', 'text' : '95'},
+               {'fillStyle' : '#e7706f', 'text' : '30'},
+               {'fillStyle' : '#eae56f', 'text' : '65'},
+               {'fillStyle' : '#89f26e', 'text' : ' 0'},
+               {'fillStyle' : '#7de6ef', 'text' : '35'},
+               {'fillStyle' : '#e7706f', 'text' : '70'}
+            ],
+            'animation' :
+            {
+                'type'     : 'spinToStop',
+                'duration' : 5,
+                'spins'    : 8,
+                'callbackFinished' : alertPrize
+            }
+        });
+
+        // Vars used by the code in this page to do power controls.
+        let wheelPower    = 0;
+        let wheelSpinning = false;
+
+        // -------------------------------------------------------
+        // Function to handle the onClick on the power buttons.
+        // -------------------------------------------------------
+        function powerSelected(powerLevel)
+        {
+            // Ensure that power can't be changed while wheel is spinning.
+            if (wheelSpinning == false) {
+                // Reset all to grey incase this is not the first time the user has selected the power.
+                document.getElementById('pw1').className = "";
+                document.getElementById('pw2').className = "";
+                document.getElementById('pw3').className = "";
+
+                // Now light up all cells below-and-including the one selected by changing the class.
+                if (powerLevel >= 1) {
+                    document.getElementById('pw1').className = "pw1";
+                }
+
+                if (powerLevel >= 2) {
+                    document.getElementById('pw2').className = "pw2";
+                }
+
+                if (powerLevel >= 3) {
+                    document.getElementById('pw3').className = "pw3";
+                }
+
+                // Set wheelPower var used when spin button is clicked.
+                wheelPower = powerLevel;
+
+                // Light up the spin button by changing it's source image and adding a clickable class to it.
+                document.getElementById('spin_button').src = "http://dougtesting.net//elements/images/examples/spin_on.png";
+                document.getElementById('spin_button').className = "clickable";
+            }
+        }
+
+        // -------------------------------------------------------
+        // Click handler for spin button.
+        // -------------------------------------------------------
+        function startSpin()
+        {
+            // Ensure that spinning can't be clicked again while already running.
+            if (wheelSpinning == false) {
+                // Based on the power level selected adjust the number of spins for the wheel, the more times is has
+                // to rotate with the duration of the animation the quicker the wheel spins.
+                if (wheelPower == 1) {
+                    theWheel.animation.spins = 3;
+                } else if (wheelPower == 2) {
+                    theWheel.animation.spins = 8;
+                } else if (wheelPower == 3) {
+                    theWheel.animation.spins = 15;
+                }
+
+                // Disable the spin button so can't click again while wheel is spinning.
+                document.getElementById('spin_button').src       = "http://dougtesting.net//elements/images/examples/spin_off.png";
+                document.getElementById('spin_button').className = "";
+
+                // Begin the spin animation by calling startAnimation on the wheel object.
+                theWheel.startAnimation();
+
+                // Set to true so that power can't be changed and spin button re-enabled during
+                // the current animation. The user will have to reset before spinning again.
+                wheelSpinning = true;
+            }
+        }
+
+        // -------------------------------------------------------
+        // Function for reset button.
+        // -------------------------------------------------------
+        function resetWheel()
+        {
+            theWheel.stopAnimation(false);  // Stop the animation, false as param so does not call callback function.
+            theWheel.rotationAngle = 0;     // Re-set the wheel angle to 0 degrees.
+            theWheel.draw();                // Call draw to render changes to the wheel.
+
+            document.getElementById('pw1').className = "";  // Remove all colours from the power level indicators.
+            document.getElementById('pw2').className = "";
+            document.getElementById('pw3').className = "";
+
+            wheelSpinning = false;          // Reset to false to power buttons and spin can be clicked again.
+        }
+
+        // -------------------------------------------------------
+        // Called when the spin animation has finished by the callback feature of the wheel because I specified callback in the parameters.
+        // -------------------------------------------------------
+        function alertPrize(indicatedSegment)
+        {
+            // Do basic alert of the segment text. You would probably want to do something more interesting with this information.
+            alert("The number selected is " + indicatedSegment.text);
+        }
+    </script>
+<br />
+
+</div>
+<br />
+            <br />
+</div>
+
+<br><br>
+This wheel is based on Winwheel.js written by Douglas McKechie.
+<br>
+Code available at <a href="http://www.dougtesting.net/">www.dougtesting.net</a>
+<br><br>
+</body>
+</html>
